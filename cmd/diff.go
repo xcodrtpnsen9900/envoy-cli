@@ -20,6 +20,8 @@ func init() {
 	})
 }
 
+// parseEnvFile reads an env file at path and returns a map of key->value,
+// an ordered slice of keys, and any error encountered.
 func parseEnvFile(path string) (map[string]string, []string, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -49,6 +51,9 @@ func parseEnvFile(path string) (map[string]string, []string, error) {
 	return vals, keys, scanner.Err()
 }
 
+// diffProfiles compares two env profiles and prints the differences.
+// Lines prefixed with '<' exist only in profile a (or differ), '>' in profile b,
+// '-' only in a, and '+' only in b.
 func diffProfiles(a, b string) {
 	pathA := profilePath(a)
 	pathB := profilePath(b)
