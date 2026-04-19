@@ -75,3 +75,18 @@ func TestSearchNonExistentProfile(t *testing.T) {
 		t.Fatal("expected error for non-existent profile")
 	}
 }
+
+func TestSearchProfileEmptyQuery(t *testing.T) {
+	dir := t.TempDir()
+	envoyDir := filepath.Join(dir, ".envoy")
+	os.MkdirAll(envoyDir, 0755)
+	os.WriteFile(filepath.Join(envoyDir, "dev.env"), []byte("DB_HOST=localhost\nDB_PORT=5432\nAPI_KEY=secret\n"), 0644)
+
+	results, err := searchProfile(dir, "dev", "", false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("expected all 3 results for empty query, got %d", len(results))
+	}
+}
