@@ -70,3 +70,20 @@ func TestProfilesByTagNotInitialized(t *testing.T) {
 		t.Fatal("expected error when envoy not initialized")
 	}
 }
+
+func TestProfilesByTagEmptyTag(t *testing.T) {
+	dir := setupTempDir(t)
+	if err := initProject(dir); err != nil {
+		t.Fatal(err)
+	}
+	if err := addProfile(dir, "dev", nil); err != nil {
+		t.Fatal(err)
+	}
+	results, err := profilesByTag(dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(results) != 0 {
+		t.Errorf("expected no results for empty tag, got %v", results)
+	}
+}
