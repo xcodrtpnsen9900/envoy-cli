@@ -31,6 +31,9 @@ func init() {
 	})
 }
 
+// lintProfile reads the named profile from dir and returns a list of
+// human-readable issue descriptions. An error is returned only when the
+// profile file cannot be read.
 func lintProfile(dir, name string) ([]string, error) {
 	path := filepath.Join(dir, ".envoy", "profiles", name+".env")
 	data, err := os.ReadFile(path)
@@ -65,6 +68,28 @@ func lintProfile(dir, name string) ([]string, error) {
 		if strings.Contains(val, "\t") {
 			issues = append(issues, fmt.Sprintf("line %d: value for %q contains tab character", lineno, key))
 		}
+		if !isValidKeyName(key) {
+			issues = append(issues, fmt.Sprintf("line %d: key %q should contain only uppercase letters, digits, and underscores", lineno, key))
+		}
 	}
 	return issues, nil
+}
+
+// isValidKeyName reports whether key follows the conventional environment
+// variable naming convention: uppercase letters, digits, and underscores only,
+// and must not start with a digit.
+func isValidKeyName(key string) bool {
+	if key == "" {
+		return false
+	}
+	for i, ch := range key {
+		switch {
+		case ch >= 'A' && ch <= 'Z':
+		case ch == '_':
+		case ch >= '0' && ch <= '9' && i > 0:
+		default:
+			return false
+		}
+	}
+	return true
 }
