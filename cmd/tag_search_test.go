@@ -87,3 +87,26 @@ func TestProfilesByTagEmptyTag(t *testing.T) {
 		t.Errorf("expected no results for empty tag, got %v", results)
 	}
 }
+
+// TestProfilesByTagMultipleTags verifies that a profile tagged with multiple
+// tags is returned when searching for any one of those tags.
+func TestProfilesByTagMultipleTags(t *testing.T) {
+	dir := setupTempDir(t)
+	if err := initProject(dir); err != nil {
+		t.Fatal(err)
+	}
+	if err := addProfile(dir, "staging", nil); err != nil {
+		t.Fatal(err)
+	}
+	_ = tagProfile(dir, "staging", []string{"cloud", "local", "ci"})
+
+	for _, tag := range []string{"cloud", "local", "ci"} {
+		results, err := profilesByTag(dir, tag)
+		if err != nil {
+			t.Fatalf("profilesByTag(%q) error: %v", tag, err)
+		}
+		if len(results) != 1 || results[0] != "staging" {
+			t.Errorf("tag %q: expected [staging], got %v", tag, results)
+		}
+	}
+}
