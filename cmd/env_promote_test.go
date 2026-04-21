@@ -24,6 +24,17 @@ func writePromoteProfile(t *testing.T, root, name, content string) {
 	}
 }
 
+// readPromoteProfile is a test helper that reads the env map for a named profile
+// under the given root directory, failing the test on any error.
+func readPromoteProfile(t *testing.T, root, name string) map[string]string {
+	t.Helper()
+	m, err := readEnvMap(filepath.Join(root, ".envoy", "profiles", name+".env"))
+	if err != nil {
+		t.Fatalf("failed to read profile %q: %v", name, err)
+	}
+	return m
+}
+
 func TestPromoteAllKeys(t *testing.T) {
 	root := setupPromoteDir(t)
 	writePromoteProfile(t, root, "staging", "DB_HOST=staging-db\nAPI_KEY=abc123\n")
@@ -34,7 +45,7 @@ func TestPromoteAllKeys(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	m, _ := readEnvMap(filepath.Join(root, ".envoy", "profiles", "prod.env"))
+	m := readPromoteProfile(t, root, "prod")
 	if m["API_KEY"] != "abc123" {
 		t.Errorf("expected API_KEY=abc123, got %q", m["API_KEY"])
 	}
@@ -53,7 +64,7 @@ func TestPromoteWithOverwrite(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	m, _ := readEnvMap(filepath.Join(root, ".envoy", "profiles", "prod.env"))
+	m := readPromoteProfile(t, root, "prod")
 	if m["DB_HOST"] != "staging-db" {
 		t.Errorf("expected DB_HOST=staging-db, got %q", m["DB_HOST"])
 	}
@@ -69,7 +80,7 @@ func TestPromoteSpecificKeys(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	m, _ := readEnvMap(filepath.Join(root, ".envoy", "profiles", "prod.env"))
+	m := readPromoteProfile(t, root, "prod")
 	if m["API_KEY"] != "abc" {
 		t.Errorf("expected API_KEY=abc, got %q", m["API_KEY"])
 	}
