@@ -90,3 +90,18 @@ func TestSearchProfileEmptyQuery(t *testing.T) {
 		t.Fatalf("expected all 3 results for empty query, got %d", len(results))
 	}
 }
+
+func TestSearchProfileCaseSensitiveMatch(t *testing.T) {
+	dir := t.TempDir()
+	envoyDir := filepath.Join(dir, ".envoy")
+	os.MkdirAll(envoyDir, 0755)
+	os.WriteFile(filepath.Join(envoyDir, "prod.env"), []byte("DB_HOST=db.prod.example.com\nDB_PORT=5432\nAPI_KEY=topsecret\n"), 0644)
+
+	results, err := searchProfile(dir, "prod", "DB_", true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("expected 2 results for case-sensitive match, got %d", len(results))
+	}
+}
