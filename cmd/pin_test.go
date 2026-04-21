@@ -90,3 +90,20 @@ func TestPinFileStoredCorrectly(t *testing.T) {
 		t.Error("expected pinned file to have content")
 	}
 }
+
+func TestPinMultipleProfiles(t *testing.T) {
+	dir := setupTempDir(t)
+	initProject(dir)
+	profiles := []string{"dev", "staging", "prod"}
+	for _, p := range profiles {
+		addProfile(dir, p, false)
+		if err := pinProfile(dir, p); err != nil {
+			t.Fatalf("expected no error pinning %q, got %v", p, err)
+		}
+	}
+	for _, p := range profiles {
+		if !isPinned(dir, p) {
+			t.Errorf("expected %q to be pinned", p)
+		}
+	}
+}
