@@ -53,3 +53,14 @@ func TestExpandTemplate(t *testing.T) {
 		t.Errorf("got %q, want %q", result, want)
 	}
 }
+
+func TestExpandTemplateUnreplacedPlaceholder(t *testing.T) {
+	// Placeholders with no matching key should remain unchanged in the output.
+	tmpl := "{{KNOWN}}:{{UNKNOWN}}"
+	envMap := map[string]string{"KNOWN": "value"}
+	result := expandTemplate(tmpl, envMap)
+	want := "value:{{UNKNOWN}}"
+	if result != want {
+		t.Errorf("got %q, want %q", result, want)
+	}
+}
